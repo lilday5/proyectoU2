@@ -7,6 +7,7 @@ import java.util.List;
 
 @members{   List <Tabla> tablas = new ArrayList<Tabla>();  
              Tabla tablaActual = null;
+             int cont = 0;
 }
 
 inicio :  creacion usar tabla+ cerrar;
@@ -32,7 +33,7 @@ tabla    : TABLA ID INICIO
                         tablaActual = t;
                      //
                    }
-             campo+ 
+             campo+ foranea*
              FIN  {
                      System.out.println("   );   "); 
                   };
@@ -52,6 +53,29 @@ campo   : ID  (t=NUMERICO | t=ALFABETICO | t=FECHA)
                   tablaActual.atributos.add(a);
                 };
 
+foranea : FORANEA ID { 
+                     for(int i=0; i<tablas.size()-1; i++){
+                        if(($ID.text).compareTo(tablas.get(i).nombre)==0) {
+                           if(tablas.get(i).nombre.compareTo(tablaActual.nombre)!=0) {
+                              System.out.println(", "+$ID.text+"_key INTEGER" );
+                              //código para crear estructura de datos
+                              Atributo a  = new Atributo();
+                              a.nombreAtributo = $ID.text+"_key";
+                              a.tipoAtributo = "INTEGER";
+                              tablaActual.atributos.add(a);
+                              cont++;
+                              break;
+                           } else { System.out.println("No puede ser foranea la misma tabla "+$ID.text);
+                              break;
+                           }
+                        }
+                     }
+                     if(cont==0) {
+                        System.out.println("No existe la tabla "+$ID.text);
+                     } 
+                     cont =0;
+                  };
+
 
 cerrar   : CERRAR {
               for (int i=0; i<tablas.size(); i++){ 
@@ -70,6 +94,7 @@ NUMERICO  : 'numeros';
 ALFABETICO: 'letras';
 FECHA     : 'fecha'  ;
 TABLA : 'tabla'  ;
+FORANEA : 'depende_de';
 INICIO: 'inicio' ;
 FIN   : 'fin'    ;
 USAR  : 'usar'   ;
